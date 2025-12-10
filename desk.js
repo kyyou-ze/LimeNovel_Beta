@@ -71,7 +71,7 @@ function renderChapters(data) {
     
     div.innerHTML = `
       <div>
-        <div onclick="location.href='CH.html?id=${encodeURIComponent(novelId)}&ch=${index}'" style="cursor:pointer;">
+        <div onclick="location.href='ch.html?id=${encodeURIComponent(novelId)}&ch=${index}'" style="cursor:pointer;">
           <i class="fas fa-book-open"></i> ${escapeHtml(chapter.title)}
         </div>
         <div class="views"><i class="fas fa-eye"></i> ${escapeHtml(chapter.views || 0)}</div>
