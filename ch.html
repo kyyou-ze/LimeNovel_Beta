@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapter Reader - LimoNovel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>    /* ---------- Variabel ukuran (px) ---------- */
+    :root{
+      --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --primary: #0b74de;
+
+      /* Ukuran dasar (px) */
+      --fs-body: 16px;       /* isi chapter */
+      --fs-h1: 20px;         /* judul chapter */
+      --fs-meta: 13px;       /* metadata */
+      --fs-quote: 15px;      /* kutipan */
+      --fs-btn: 14px;        /* tombol */
+      --fs-small: 12px;      /* teks kecil footer */
+      --cover-w: 96px;
+      --cover-h: 128px;
+    }
+
+    /* ---------- Reset & layout ---------- */
+    html,body { height:100%; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      margin: 0;
+      padding: 20px;
+      color: #111;
+      font-size: var(--fs-body);
+      line-height: 1.6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .container { max-width:720px; margin:0 auto; }
+
+    /* ---------- Topbar ---------- */
+    .topbar { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .back-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:8px; background:#fff;
+      box-shadow:0 1px 4px rgba(0,0,0,0.06); text-decoration:none; color:#111;
+      font-weight:600; font-size:14px;
+      border:1px solid #e6e7ea;
+    }
+    .controls-panel { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+    /* ---------- Card ---------- */
+    .read-card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(12,20,30,0.06);
+      overflow: hidden;
+    }
+    .meta { font-size: var(--fs-meta); color: var(--muted); margin-bottom: 6px; }
+    h1 { font-size: var(--fs-h1); margin: 6px 0; font-weight:700; }
+    .chapter-title { font-weight:600; color:#111; margin:6px 0 12px; display:block; }
+    blockquote {
+      margin: 0 0 12px;
+      border-left: 3px solid #eef2ff;
+      color: #333;
+      font-size: var(--fs-quote);
+      background: linear-gradient(90deg, rgba(14,165,233,0.03), transparent);
+      border-radius: 6px;
+      padding: 12px;
+    }
+    .controls { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:8px; text-decoration:none; font-weight:600; font-size:var(--fs-btn); }
+    .btn.primary { background: var(--primary); color:#fff; }
+    .btn.ghost { background:#f3f4f6; color:#111; border:1px solid #e6e7ea;}
+    .btn.raw {display: none;}
+    .small { font-size: var(--fs-small); color:var(--muted); margin-top:10px; display:block; }
+
+    .cover { float: right; width: var(--cover-w); height: var(--cover-h); object-fit: cover; border-radius: 6px; margin-left: 12px; }
+
+    .loading { text-align:center; padding:28px 0; color:var(--muted); font-size: var(--fs-meta); }
+    .error { color:#b91c1c; padding:12px 0; font-size: var(--fs-meta); }
+
+    /* ---------- Reader modal ---------- */
+    .reader { position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; padding:20px; z-index:9999; }
+    .reader .sheet { width:100%; max-width:760px; max-height:90vh; overflow:auto; background:#fff; border-radius:8px; padding:20px; }
+    .reader .close { float:right; background:#eee; border-radius:6px; padding:6px 10px; text-decoration:none; color:#111; font-size:13px; }
+    .chapter-content { white-space:pre-wrap; line-height:1.8; color:#111; font-size: var(--fs-body); }
+
+    /* ---------- Font selector & size controls ---------- */
+    .font-select { padding:8px 10px; border-radius:8px; border:1px solid #e6e7ea; background:#fff; font-size:13px; }
+    .size-controls { display:flex; gap:8px; align-items:center; }
+    .size-btn { padding:6px 8px; border-radius:6px; border:1px solid #e6e7ea; background:#fff; cursor:pointer; font-size:13px; }
+    .size-slider { width:160px; }
+    .preset-btn { padding:6px 8px; border-radius:6px; background:#f3f4f6; border:1px solid #e6e7ea; cursor:pointer; font-size:13px; }
+
+    @media (max-width:480px){
+      .cover{ display:none; }
+      .topbar { padding:0 4px; }
+      :root {
+        --fs-body: 15px;
+        --fs-h1: 18px;
+        --fs-quote: 14px;
+        --fs-btn: 14px;
+        --fs-meta: 12px;
+        --fs-small: 11px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a href="#" id="backBtn" class="back-btn" aria-label="Kembali ke halaman sebelumnya">← Kembali</a>
+
+      <div class="controls-panel" role="region" aria-label="Kontrol tampilan">
+        <!-- Font selector -->
+        <label for="fontSelect" style="font-size:13px;color:var(--muted);margin-right:6px;"></label>
+        <select id="fontSelect" class="font-select" aria-label="Pilih font">
+          <option value="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial">Inter</option>
+          <option value="Roboto, system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial">Roboto</option>
+          <option value="Poppins, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial">Poppins</option>
+          <option value="Merriweather, Georgia, 'Times New Roman', serif">Merriweather</option>
+          <option value="Playfair Display, Georgia, serif">Playfair Display</option>
+          <option value='"Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial'>Source Sans 3</option>
+          <option value="Noto Serif, Georgia, serif">Noto Serif</option>
+          <option value="Nunito, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial">Nunito</option>
+        </select>
+
+        <!-- Size controls -->
+        <div class="size-controls" style="margin-left:8px;">
+          <button id="decBtn" class="size-btn" aria-label="Perkecil teks">A-</button>
+          <input id="sizeSlider" class="size-slider" type="range" min="12" max="24" step="1" value="16" aria-label="Atur ukuran teks isi">
+          <button id="incBtn" class="size-btn" aria-label="Perbesar teks">A+</button>
+        </div>
+
+        <!-- Preset -->
+
+      </div>
+    </div>
+  
+  <div class="container">
+    <div id="app">
+      <!-- Content will be loaded here -->
+    </div>
+  </div>
+
+  <!-- Library untuk membaca DOCX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  
+  <!-- Main script menggunakan CH.js yang baru -->
+  <script src="CH.js"></script>
+</body>
+</html>
